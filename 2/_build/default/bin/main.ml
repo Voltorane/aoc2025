@@ -29,7 +29,9 @@ let ranges =
   let l = String.split_on_char ',' s in
     let rec get_ranges arr curr = match arr with
     | [] -> curr
-    | x::xs -> get_ranges xs ((int_of_string (List.nth (String.split_on_char '-' x) 0), int_of_string (List.nth (String.split_on_char '-' x) 1))::curr) in
+    | x::xs -> let split = (String.split_on_char '-' x) in
+    let first, second = ((int_of_string (List.nth split 0), int_of_string (List.nth split 1))) in
+      get_ranges xs ((first, second)::curr) in
   get_ranges l []
 
 
