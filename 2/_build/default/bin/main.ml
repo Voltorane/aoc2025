@@ -1,6 +1,6 @@
-let rec count_digit n curr = match n with
-| 0 -> curr
-| _ -> count_digit (n / 10) (curr + 1)
+let count_digit n _ = if n = 0 then 1 else
+  let rec helper t = if t = 0 then 0 else 1 + helper (t / 10) in
+  helper n
 let rec pow x n = match n with 
 | 0 -> 1
 | _ -> x * (pow x (n-1))
@@ -15,14 +15,14 @@ if len_n = 1 then n = q else
   else false
 
 (* I need to handle  *)
-let _only_repeated n =
+let _only_repeated n = if count_digit n 0 = 1 then false else
   let rec helper n q curr =
     (* Printf.printf("%d %d %d\n") n q curr;  *)
     if count_digit q 0 > (count_digit n 0) / 2 then false
     else let repeated = consists_only_of n (count_digit n 0) q in
       if repeated then true
       else helper n (n / pow 10 ((count_digit n 0) - curr)) ((count_digit q 0) + 1)
-in if n < 10 then true else helper n (n / pow 10 ((count_digit n 0)-1)) 1
+in if n < 10 then true else helper n (n / pow 10 ((count_digit n 0))) 1
 let is_invalid n = _only_repeated n
   (* let num_digits = count_digit n 0 in
     if num_digits mod 2 == 0 then
@@ -41,7 +41,7 @@ let read (file_name : string) : string =
   In_channel.with_open_text file_name In_channel.input_all
 
 let _ranges = 
-  let l = String.split_on_char ',' (read "../test_input_2") in
+  let l = String.split_on_char ',' (read "../input_2") in
     let rec get_ranges arr curr = match arr with
     | [] -> curr
     | x::xs -> let split = (String.split_on_char '-' x) in
@@ -50,9 +50,9 @@ let _ranges =
           get_ranges l []
 
 
+          let () = print_newline ()
+          
+          
 let () = print_int (_sum_invalid_across_ranges _ranges 0)
-let () = print_newline ()
-
-
-(* let () = Printf.printf("%b\n") (_only_repeated 121212) *)
+(* let () = Printf.printf("%b\n") (_only_repeated 99099) *)
 (* let () = Printf.printf("%b\n") (consists_only_of 121212 6 12) *)
