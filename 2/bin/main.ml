@@ -11,13 +11,13 @@ if len_n = 1 then n = q else
  if len_n mod len_q != 0 then false
   else match len_n with
   | 0 -> true
-  | _ -> if n / (pow 10 (len_n - len_q)) = q then consists_only_of (n mod (pow 10 (len_n - len_q))) (len_n - len_q) q 
+  | _ -> if n mod (pow 10 (len_q)) = q then consists_only_of (n / (pow 10 (len_q))) (len_n - len_q) q 
   else false
 
 (* I need to handle  *)
 let _only_repeated n =
   let rec helper n q curr =
-    Printf.printf("%d %d %d\n") n q curr; 
+    (* Printf.printf("%d %d %d\n") n q curr;  *)
     if count_digit q 0 > (count_digit n 0) / 2 then false
     else let repeated = consists_only_of n (count_digit n 0) q in
       if repeated then true
@@ -41,7 +41,7 @@ let read (file_name : string) : string =
   In_channel.with_open_text file_name In_channel.input_all
 
 let _ranges = 
-  let l = String.split_on_char ',' (read "../input_2") in
+  let l = String.split_on_char ',' (read "../test_input_2") in
     let rec get_ranges arr curr = match arr with
     | [] -> curr
     | x::xs -> let split = (String.split_on_char '-' x) in
@@ -50,9 +50,9 @@ let _ranges =
           get_ranges l []
 
 
-(* let () = print_int (_sum_invalid_across_ranges _ranges 0) *)
+let () = print_int (_sum_invalid_across_ranges _ranges 0)
 let () = print_newline ()
 
 
-let () = Printf.printf("%b\n") (_only_repeated 52520052)
+(* let () = Printf.printf("%b\n") (_only_repeated 121212) *)
 (* let () = Printf.printf("%b\n") (consists_only_of 121212 6 12) *)
