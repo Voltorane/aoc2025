@@ -1,9 +1,6 @@
 (* let count_digit n _ = if n = 0 then 1 else
   let rec helper t = if t = 0 then 0 else 1 + helper (t / 10) in
   helper n
-let rec pow x n = match n with 
-| 0 -> 1
-| _ -> x * (pow x (n-1))
 let _is_repeated n num_digits = n mod (pow 10 (num_digits / 2)) - n / (pow 10 (num_digits / 2)) == 0
 let rec consists_only_of n len_n q = if n = q then true else let len_q = (count_digit q 0) in
 (* Printf.printf("c: %d %d %d %d\n") n q len_n len_q; *)
@@ -32,8 +29,6 @@ let rec sum_invalid_in_range curr e curr_sum =
 let rec _sum_invalid_across_ranges ranges curr_sum = match ranges with
 | [] -> curr_sum
 | (s,e)::xs -> _sum_invalid_across_ranges xs curr_sum+(sum_invalid_in_range s e 0)
-let read (file_name : string) : string =
-  In_channel.with_open_text file_name In_channel.input_all
 
 let _ranges = 
   let l = String.split_on_char ',' (read "../input_2") in
@@ -57,8 +52,10 @@ let rec _print_int_list l = match l with
 let rec _print_int_list_with_indexes l = match l with
 | [] -> ()
 | (x,i)::xs -> Printf.printf "(%d; %d)" x i; _print_int_list_with_indexes xs
-
-let int_to_list n = if n = 0 then [0] else
+let rec _pow x n = match n with 
+| 0 -> 1
+| _ -> x * (_pow x (n-1))
+let _int_to_list n = if n = 0 then [0] else
   let rec helper m = match m with
   | 0 -> []
   | _ -> (m mod 10)::(helper (m / 10))
@@ -79,9 +76,9 @@ in if rev then List.rev sorted else sorted *)
 (* let sorted_list = sort_list (list_with_indexes (int_to_list 8119)) true
 let () = _print_int_list_with_indexes sorted_list; print_newline () *)
 
-let combine_digits l r = l * 10 + r
+let _combine_digits l r = l * 10 + r
 
-let max a b = if a >= b then a else b
+let _max a b = if a >= b then a else b
 
 (* let get_max_num l = 
   let rec helper l_1 r_1 = match l_1,r_1 with
@@ -103,21 +100,45 @@ in helper (List.drop 2 (List.rev l)) (List.nth (List.rev l) 1) (List.nth (List.r
 (* let sorted l = List.sort (fun (x, i) (y, j) -> if x > y && i < j then 1 else -1) *)
 
 (* let () = print_int (get_max_num_actual (int_to_list 8119)) *)
-
+let _explode_string s = List.init (String.length s) (String.get s);;
+let _string_to_int_list s = 
+  let l = _explode_string s in
+    let rec aux = function
+        | [] -> []
+        | x::xs -> (int_of_char x) - 48 :: (aux xs)
+  in aux l
 (* 
 1. find max between start and end-k
 2. continue from max_index and k-1
 *)
 let max_with_ind l = 
   let rec helper curr_max curr_max_i i = function
-| [] -> (curr_max, curr_max_i)
-| x::xs -> let res = max x curr_max in
-if res > curr_max then helper res i (i-1) xs
-else helper curr_max curr_max_i (i-1) xs
-in helper (List.nth l 0) 0 0
+    | [] -> (curr_max, curr_max_i)
+    | x::xs -> let res = max x curr_max in
+      if res > curr_max then helper res i (i+1) xs
+      else helper curr_max curr_max_i (i+1) xs
+  in helper (List.nth l 0) 0 0 l
 
+let list_to_int l =
+  let rec aux curr i = function
+    | [] -> curr
+    | x::xs -> aux (x*(_pow 10 i)+curr) (i+1) xs
+in aux 0 0 (List.rev l)
+let drop_last n l = (List.rev (List.drop (n)(List.rev l)))
+let get_max_k_digit_num k s =
+  let l = _string_to_int_list s in
+    let rec aux curr_list digits_left = match digits_left with
+    | 1 -> let (x, _) = (max_with_ind curr_list) in [x]
+    | _ -> let next_digit, next_start = max_with_ind (drop_last (digits_left-1) curr_list) in
+    next_digit::(aux (List.drop (next_start+1) curr_list) (digits_left-1))
+in list_to_int (aux l k)
+let read file_name =
+  In_channel.with_open_text file_name In_channel.input_lines
+let rec get_sum_joltage = function
+| [] -> 0
+| x::xs -> (get_max_k_digit_num 12 x) + get_sum_joltage xs
+let () = print_int (get_sum_joltage (read "input_3"))
+(* let () = let (x, i) = (max_with_ind (_string_to_int_list "1111")) in Printf.printf "%d %d" x i *)
 
-let get_max_k_digit_num k l = 
-  let rec acc k digits_left = function
-  | [] -> let k_list = List.rev (List.drop (k-1) (List.rev l)) in
-    let x, i = max_with_ind k_list in
+(* let get_max_k_digit_num k l =
+   *)
