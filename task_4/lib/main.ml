@@ -73,17 +73,23 @@ let is_surrounding_free x y w h ht =
     let has_ld = (*print_string "f";*) if x > 0 && y < h-1 && Hashtbl.find ht (w*(y+1)+(x-1)) then 1 else 0 in
     let has_ru = (*print_string "g";*) if x < w-1 && y > 0 && Hashtbl.find ht (w*(y-1)+(x+1)) then 1 else 0 in
     let has_rd = (*print_string "h";*) if x < w-1 && y < h-1 && Hashtbl.find ht (w*(y+1)+(x+1)) then 1 else 0 in
-    if has_right + has_left + has_dn + has_up + has_lu + has_ld + has_ru + has_rd < 4 then let () = Printf.printf "true: %d %d \n" x y in true else let () = Printf.printf "false: %d %d \n" x y in false
+    if has_right + has_left + has_dn + has_up + has_lu + has_ld + has_ru + has_rd < 4 then true else false
 
 let _get_free_sum w h char_list =
   let ht = _get_hashtable char_list in
-    let rec aux x y = function
-    | [] -> 0
+    let rec aux x y new_char_list curr = function
+    | [] -> (curr, new_char_list)
     | c::xc -> let next_x, next_y = if x = w-1 then 0, y+1 else x+1, y in
-      if c = '@' && is_surrounding_free x y w h ht then 1 + aux next_x next_y xc 
-      else aux next_x next_y xc
-    in aux 0 0 char_list
+      if c = '@' && is_surrounding_free x y w h ht then
+        let () =  Hashtbl.replace ht (h*y+x) false 
+      in aux next_x next_y ('.'::new_char_list) (curr+1) xc
+      else aux next_x next_y (c::new_char_list) curr xc
+    in aux 0 0 [] 0 char_list
 
 let w, h, list = (get_flat_list "input_4")
+
+let rec _get_max_removed w h char_list =
+  let (removed, new_char_list) = _get_free_sum w h char_list in
+  if removed = 0 then 0 else removed + _get_max_removed w h new_char_list
 
 let _print_hashtable ht = Hashtbl.iter (fun x y -> Printf.printf "%s -> %s\n" (string_of_int x) (string_of_bool y)) ht;;
