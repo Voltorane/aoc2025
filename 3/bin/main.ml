@@ -95,10 +95,29 @@ in helper l (List.filter (fun (_, i) -> i != 0) l) *)
 
 (* let () = print_int (get_max_num sorted_list) *)
 (* let () = _print_int_list_with_indexes (List.filter (fun (_, i) -> i != 0) sorted_list) *)
-let get_max_num_actual l =
+(* let get_max_num_actual l =
   let rec helper list max_val next_max = match list with
   | [] -> combine_digits max_val next_max
   | x::xs -> if x > max_val then helper xs x max_val else helper xs max_val (max x next_max)
-in helper (List.drop 2 (List.rev l)) (List.nth (List.rev l) 1) (List.nth (List.rev l) 0)
+in helper (List.drop 2 (List.rev l)) (List.nth (List.rev l) 1) (List.nth (List.rev l) 0) *)
+(* let sorted l = List.sort (fun (x, i) (y, j) -> if x > y && i < j then 1 else -1) *)
 
-let () = print_int (get_max_num_actual (int_to_list 8119))
+(* let () = print_int (get_max_num_actual (int_to_list 8119)) *)
+
+(* 
+1. find max between start and end-k
+2. continue from max_index and k-1
+*)
+let max_with_ind l = 
+  let rec helper curr_max curr_max_i i = function
+| [] -> (curr_max, curr_max_i)
+| x::xs -> let res = max x curr_max in
+if res > curr_max then helper res i (i-1) xs
+else helper curr_max curr_max_i (i-1) xs
+in helper (List.nth l 0) 0 0
+
+
+let get_max_k_digit_num k l = 
+  let rec acc k digits_left = function
+  | [] -> let k_list = List.rev (List.drop (k-1) (List.rev l)) in
+    let x, i = max_with_ind k_list in
