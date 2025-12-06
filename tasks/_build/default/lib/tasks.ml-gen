@@ -15,5 +15,8 @@ module Task_4 = Tasks__Task_4
 (** @canonical Tasks.Task_5 *)
 module Task_5 = Tasks__Task_5
 
+(** @canonical Tasks.Task_6 *)
+module Task_6 = Tasks__Task_6
+
 (** @canonical Tasks.Utils *)
 module Utils = Tasks__Utils
