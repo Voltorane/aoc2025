@@ -1,6 +1,20 @@
 type op = Add | Mul
 module IntSet = Set.Make(Int);;
 
+let string_of_list l =
+  let rec aux res = function
+| [] -> res^"]"
+| x::xs -> aux (Printf.sprintf "%s %d," res x ) xs
+in aux "[" l
+
+let ht_to_string ht = 
+  let keys = Hashtbl.to_seq_keys ht in
+  List.fold_left (
+    fun acc a -> 
+      let vals = Hashtbl.find ht a 
+      in Printf.sprintf "%s(%d) -> %s\n" acc a (string_of_list vals)
+    ) "" (List.of_seq keys)
+
 let _op_of_string = function
 | "+" -> Add
 | "*" -> Mul
@@ -85,9 +99,9 @@ let _make_number_ht number_lines num_start_ids ht =
     let rec aux i col = function
     | [] -> ()
     | x::xs -> if not (IntSet.mem i num_start_ids) then aux (i+1) col xs else
-      Printf.printf "%d %d %s %s\n" i col l x;
+      Printf.printf "%d %d %s %s %s\n" i col l x (ht_to_string ht);
       let exists = Hashtbl.mem ht col in 
-      let placeholder = if exists then -1 else 0 in
+      let placeholder = -1(* if exists then -1 else 0*) in
       let new_int_list = _int_list_of_char_list (List.of_seq (String.to_seq x)) placeholder in
       let () = 
         if not(exists) then

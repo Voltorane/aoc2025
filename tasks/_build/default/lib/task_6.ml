@@ -1,6 +1,20 @@
 type op = Add | Mul
 module IntSet = Set.Make(Int);;
 
+let string_of_list l =
+  let rec aux res = function
+| [] -> res^"]"
+| x::xs -> aux (Printf.sprintf "%s %d," res x ) xs
+in aux "[" l
+
+let ht_to_string ht = 
+  let keys = Hashtbl.to_seq_keys ht in
+  List.fold_left (
+    fun acc a -> 
+      let vals = Hashtbl.find ht a 
+      in Printf.sprintf "%s(%d) -> %s\n" acc a (string_of_list vals)
+    ) "" (List.of_seq keys)
+
 let _op_of_string = function
 | "+" -> Add
 | "*" -> Mul
@@ -77,31 +91,46 @@ let _int_list_of_char_list char_list placeholder =
   | x::xs -> if x = ' ' then aux (placeholder::curr) xs else aux (((int_of_char x) - 48)::curr) xs
 in aux [] char_list
 
+(* helper: get substring starting at pos until next space or end *)
+let take_token_from s pos =
+  let n = String.length s in
+  let j = ref pos in
+  while !j < n && s.[!j] <> ' ' do j := !j + 1 done;
+  String.sub s pos (!j - pos)
+
 let _make_number_ht number_lines num_start_ids ht =
-  (* let ht = Hashtbl.create cols in *)
   let rec for_lines = function
-  | [] -> ()
-  | l::lx ->
-    let rec aux i col = function
     | [] -> ()
-    | x::xs -> if not (IntSet.mem i num_start_ids) then aux (i+1) col xs else
-      Printf.printf "%d %d %s %s\n" i col l x;
-      let exists = Hashtbl.mem ht col in 
-      let placeholder = if exists then -1 else 0 in
-      let new_int_list = _int_list_of_char_list (List.of_seq (String.to_seq x)) placeholder in
-      let () = 
-        if not(exists) then
-          (*initialize nums*)
-          Hashtbl.add ht col new_int_list
-        else
-            let rec get_updated_digits existing_list new_list res = match (existing_list, new_list) with
-            | ([], []) -> res
-            | (e::es, n::ns) -> if n = -1 then get_updated_digits es ns (e::res) else get_updated_digits es ns ((e*10 + n)::res)
-            | (_, _) -> raise (Invalid_argument "existing and new lists have different dimensions")
-          in Printf.printf "replacing %d\n" col; Hashtbl.replace ht col (get_updated_digits (Hashtbl.find ht col) new_int_list [])
-      in aux (i+1) (col+1) xs
-    in aux 0 0 (String.split_on_char ' ' l); for_lines lx
+    | l::lx ->
+      (* for each start position (sorted) extract token from this row *)
+      IntSet.elements num_start_ids
+      |> List.iter (fun start_pos ->
+          if start_pos < String.length l then
+            let token = take_token_from l start_pos in
+            let col = (* you must decide a column id mapping; use index in start list *)
+              (* find index of start_pos in the elements list *)
+              let rec idx_from_list i = function
+                | [] -> raise (Invalid_argument "start_pos not found")
+                | p::ps -> if p = start_pos then i else idx_from_list (i+1) ps
+              in idx_from_list 0 (IntSet.elements num_start_ids)
+            in
+            let exists = Hashtbl.mem ht col in
+            let placeholder = -1 in   (* always -1, never 0 *)
+            let new_int_list = _int_list_of_char_list (List.of_seq (String.to_seq token)) placeholder in
+            if not exists then Hashtbl.add ht col new_int_list
+            else
+              let rec get_updated_digits existing_list new_list res = match (existing_list, new_list) with
+                | ([], []) -> res
+                | (e::es, n::ns) -> if n = -1 then get_updated_digits es ns (e::res) else get_updated_digits es ns ((e*10 + n)::res)
+                | (_, _) -> raise (Invalid_argument "existing and new lists have different dimensions")
+              in
+              Hashtbl.replace ht col (get_updated_digits (Hashtbl.find ht col) new_int_list [])
+          else
+            ()  (* nothing at this row for that start position *)
+        );
+      for_lines lx
   in for_lines number_lines; ht
+
 
 (*skipping last line*)
 let _get_number_lines file_name =

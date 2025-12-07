@@ -25,15 +25,12 @@ let get_sum_divisions file_name =
     if IntSet.is_empty x then
       aux splits curr_beam_ids xs
     else
-      (* let () = Printf.printf "beams: %s dividers: %s\n" (string_of_list curr_beam_ids) (string_of_set x) in *)
       let rec get_new_beam_ids new_splits i res = function
       | [] -> (res, new_splits)
       | b::bs ->
         if IntSet.mem b x then
-          (* let () = print_string "a\n" in *)
           get_new_beam_ids (new_splits+1) (i+1) ((b-1)::(b+1)::res) bs
         else
-          (* let () = print_string "b\n" in *)
           get_new_beam_ids new_splits (i+1) (b::res) bs
     in let new_beams, new_splits = get_new_beam_ids 0 0 [] (IntSet.to_list (IntSet.of_list curr_beam_ids)) in
   aux (splits+new_splits) new_beams xs 
@@ -57,15 +54,12 @@ let get_sum_timelines file_name =
     if IntSet.is_empty x then
       aux curr_beam_ids xs
     else
-      (* let () = Printf.printf "beams: %s dividers: %s\n" (string_of_tuple_list curr_beam_ids) (string_of_set x) in *)
       let rec get_new_beam_ids res = function
       | [] -> res
       | (b, num_timelines)::bs ->
         if IntSet.mem b x then
-          (* let () = print_string "a\n" in *)
           get_new_beam_ids ((b-1, (num_timelines))::(b+1, (num_timelines))::res) bs
         else
-          (* let () = print_string "b\n" in *)
           get_new_beam_ids ((b, num_timelines)::res) bs
     in let new_beams = get_new_beam_ids [] (merge_duplicates curr_beam_ids) in
   aux new_beams xs 
