@@ -1,1 +1,1 @@
-lib/task_6.ml: Hashtbl List String Utils
+lib/task_6.ml: Hashtbl Int List Printf Set String Utils
