@@ -12,3 +12,7 @@ let get_ids_of_element l el =
   | x::xs -> if x = el then aux (i+1) (i::res) xs
   else aux (i+1) res xs
 in aux 0 [] l
+
+let rec print_int_list = Printf.printf "["; function
+| [] -> print_string "]\n"
+| x::xs -> Printf.printf "%d, " x; print_int_list xs
